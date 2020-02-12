@@ -26,6 +26,8 @@ void remCardsP1(string[], string[]);
 void remCardsComp(string[], string[]); 
 int checkMatches(string[]); //checks matches within hand, removes them, and returns number of matches 
 void refillHand(string[], string[]); //refills hand to have a total of 7 cards 
+bool checkDeck(string[], float deckCnt); //check if deck has any cards left 
+int checkCard(string, string[]); //checks if use-chosen card is in opponent's hand 
 //class used to hold an array of cards 
 
 //Execution Begins Here
@@ -40,6 +42,12 @@ int main(int argc, char** argv) {
     string comDeck[7]; //computer deck 
     int p1match; //counts number of matches for P1; 
     int cmatch; //counts number of matches for computer; 
+    int match1; 
+    int match2; 
+    float* deckCnt, p1Cnt, comCnt; //used to check how many cards are left in the deck 
+    bool chkDeck, chkP1, chkComp; //used to check if there are any cards left in the deck 
+    
+    string card; 
     //Initialize Variables
     p1match = 0; 
     cmatch = 0; 
@@ -60,11 +68,73 @@ int main(int argc, char** argv) {
     cmatch += checkMatches(comDeck); 
     refillHand(deck, p1deck); 
     refillHand(deck, comDeck); 
-    
+    match1 = 1; 
+    match2 = 1; 
+    while (match1 > 0 || match2 > 0) 
+    {
+        match1 = checkMatches(p1deck); 
+        if (match1 > 0) 
+        {
+           p1match += checkMatches(p1deck); 
+           refillHand(deck, p1deck); 
+        }
+        match2 = checkMatches(comDeck); 
+        if (match2 > 0) 
+        {
+            cmatch += checkMatches(comDeck); 
+            refillHand(deck, comDeck); 
+        }
+    }
     cout<<"Player 1 deck: "; 
     showDeck(p1deck); 
     cout<<"Computer deck: "; 
     showDeck(comDeck); 
+    
+    chkDeck = checkDeck(deck, *deckCnt); 
+    chkP1 = checkDeck(p1deck, *p1Cnt); 
+    chkComp = checkDeck(comDeck, *comCnt); 
+    if (checkDeck == true || chkP1 == true || chkComp == true); 
+    {
+        bool chkCard = false; //used to validate user input of card 
+        while (chkCard == false)
+        {
+            cout<<"Which card would you like to ask the computer for: \n"; 
+            cout<<"Spell out the number or face card with standard capitalization.\n"; 
+            cin>>card; 
+            for (int i = 0; i < 13; i++) 
+            {
+                if (card == faces[i])
+                {
+                    chkCard = true; 
+                }
+                else 
+                {
+                    chkCard = false; 
+                    cout<<"Invalid input.\n";
+                }
+            }
+        }
+        int num; 
+        num = checkCard(card, comDeck); 
+        if (num > 0) 
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                if (comDeck[i] == card)
+                {
+                    comDeck[i] = ""; 
+                    p1deck[i] = ""; 
+                    p1match++; 
+                    num--; 
+                }
+            }
+        }
+        else if (num == 0)
+        {
+            cout<<"Go Fish!"; 
+        }
+    }
+    
     
     //Display Outputs
 
@@ -132,7 +202,7 @@ int checkMatches(string array[])
 {
     int matches; 
     int i = 0; 
-    while (array[i] != "") 
+    do
     {
         for (int i = 0; i < 7; i++) 
         {
@@ -147,7 +217,7 @@ int checkMatches(string array[])
             }
         }
         i++; 
-    }
+    }while (array[i] != ""); 
     return matches; 
 }
 void refillHand(string deck[], string array[]) 
@@ -166,4 +236,33 @@ void refillHand(string deck[], string array[])
             }
         }
     }
+}
+bool checkDeck(string deck[], float* deckCnt) 
+{
+    bool check; 
+    int num = 0; 
+    for (int i = 0; i < 52; i++)
+    {
+        if (deck[i] != "") 
+        {
+            num++; 
+            deckCnt++; 
+        }
+    }
+    if (num > 0) 
+    {
+        check = true; 
+    }
+}
+int checkCard(string card, string deck[]) 
+{
+    int num = 0; 
+    for (int i = 0; i < 7; i++) 
+    {
+        if (deck[i] == card)
+        {
+            num++;   
+        }
+    }
+    return num; //if num > 0, match exists and num is the number of that type of card in opponent's hand. 
 }
